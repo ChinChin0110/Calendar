@@ -29,7 +29,24 @@ class CalendarTests: XCTestCase {
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {
-            // Put the code you want to measure the time of here.
+            let firstSunday = Date().nextSunday
+            var result = [firstSunday]
+            (1...52).forEach { (_) in
+                guard let nextSunday = result.last?.nextSunday,
+                    let previousSunday = result.first?.previousSunday
+                    else { return }
+                result.append(nextSunday)
+                result.insert(previousSunday, at: 0)
+            }
+//
+//            let formatter = DateFormatter()
+//            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+//            formatter.timeStyle = .none
+//            formatter.dateFormat = "yyyy-MM-dd"
+//
+//            result.forEach { (date) in
+//                print(formatter.string(from: date))
+//            }
         }
     }
     
