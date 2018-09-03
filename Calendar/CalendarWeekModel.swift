@@ -8,6 +8,9 @@
 
 import Foundation
 
+/**
+ `CalendarWeekModel` represents a week.
+ */
 struct CalendarWeekModel: CustomStringConvertible {
     var description: String {
         return "\(formatter.string(from: firstDate)) - \(formatter.string(from: lastDate))"

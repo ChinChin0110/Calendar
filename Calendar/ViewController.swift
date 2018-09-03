@@ -16,6 +16,8 @@ class ViewController: UIViewController {
         return tableview
     }()
     
+    let service = CalendarService(yearRange: 1)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -25,12 +27,19 @@ class ViewController: UIViewController {
         let indexPath = IndexPath.init(row: 5, section: 500 )
         tableView.scrollToRow(at: indexPath, at: .top, animated: false)
 
-        let service = CalendarService()
-        service.weekModel.forEach { (model) in
+        
+        service.weekModels.forEach { (model) in
             print(model.month)
             print(model.description)
             print("-----------")
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        print(service.thisWeek)
+        print(service.weekModelsGroupByMonth)
     }
     
     override func didReceiveMemoryWarning() {
