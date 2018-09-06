@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TableViewCell: UITableViewCell {
+class WeekTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()

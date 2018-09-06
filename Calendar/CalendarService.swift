@@ -14,7 +14,7 @@ class CalendarService {
     let thisWeek: CalendarWeekModel
     
     lazy private(set) var weekModels: [CalendarWeekModel] = {
-        return getSundayOfYears()
+        return getWeekModelsOfYears()
     }()
     
     /// Create weekModels group by same month.
@@ -49,14 +49,35 @@ class CalendarService {
         self.thisWeek = CalendarWeekModel(firstDate: previousSunday)
     }
     
+    func getWeekModel(by date: Date) -> CalendarWeekModel? {
+        for weekModel in weekModels {
+            if weekModel.isContains(date) {
+                return weekModel
+            }
+        }
+        return nil
+    }
+    
+    func getGroupIndex(by date: Date) -> Int? {
+        guard let weekModelFromDate = getWeekModel(by: date) else { return nil }
+        for (index, weekModels) in weekModelsGroupByMonth.enumerated() {
+            if let firstWeek = weekModels.first,
+                firstWeek.year == weekModelFromDate.year,
+                firstWeek.month == weekModelFromDate.month {
+                return index
+            }
+        }
+        return nil
+    }
+    
     /// get all sundays
-    private func getSundayOfYears() -> [CalendarWeekModel] {
+    private func getWeekModelsOfYears() -> [CalendarWeekModel] {
         let firstSunday = Date().nextSunday
         var result = [CalendarWeekModel(firstDate: firstSunday)]
         
         (1...(yearRange * 26)).forEach { (_) in
-            guard let nextSunday = result.last?.firstDate.nextSunday,
-                let previousSunday = result.first?.firstDate.previousSunday
+            guard let nextSunday = result.last?.startDate.nextSunday,
+                let previousSunday = result.first?.startDate.previousSunday
                 else { return }
             result.append(CalendarWeekModel(firstDate: nextSunday))
             result.insert(CalendarWeekModel(firstDate: previousSunday), at: 0)
