@@ -13,10 +13,18 @@ class ViewController: UIViewController {
     lazy var tableView: UITableView = {
         let tableview = UITableView(frame: .zero, style: .grouped)
         tableview.register(WeekTableViewCell.self, forCellReuseIdentifier: String(describing: WeekTableViewCell.self))
+        tableview.register(EventTableViewCell.self, forCellReuseIdentifier: String(describing: EventTableViewCell.self))
+        tableview.register(CalendarHeaderView.self, forHeaderFooterViewReuseIdentifier: String(describing: CalendarHeaderView.self))
+        tableview.separatorStyle = .none
+        tableview.showsVerticalScrollIndicator = false
+        tableview.estimatedSectionHeaderHeight = UIScreen.main.bounds.height / 4.5
+        tableview.rowHeight = 60
+        tableview.estimatedRowHeight = 60
+        tableview.sectionHeaderHeight = UIScreen.main.bounds.height / 4.5
         return tableview
     }()
     
-    let viewModel = ViewModel(yearRange: 2)
+    let viewModel = ViewModel(yearRange: 3)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,10 +43,17 @@ class ViewController: UIViewController {
     
     private func bindViewModel() {
         viewModel.weekModelsUpdateClosure = { [weak self] section in
-            print(section)
-            self?.tableView.reloadSections([section], with: .automatic)
+            self?.tableView.reloadSections([section], with: .none)
         }
     }
+    
+    var images: [UIImage] = {
+        var images = [UIImage]()
+        for index in (1...12) {
+            images.append(UIImage(named: "image-\(index).jpg")!)
+        }
+        return images
+    }()
 }
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
@@ -52,28 +67,36 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let month = viewModel.eventWeekModels[section].first?.calendarWeekModel.month ?? -1
-        let year = viewModel.eventWeekModels[section].first?.calendarWeekModel.year ?? -1
-        let label = UILabel(frame: CGRect.init(origin: .zero, size: CGSize.init(width: 50, height: 50)))
-        label.backgroundColor = .red
-        label.text = "\(year)  \(month)"
-        return label
+        let monthAndYear = viewModel.monthAndYearAtSection(section)
+        let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: String(describing: CalendarHeaderView.self)) as? CalendarHeaderView
+        let image = images[monthAndYear.month - 1]
+        header?.imageView.image = image
+        let text = "\(monthAndYear.year)  \(monthAndYear.month)"
+        header?.updateString(text)
+        return header
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: WeekTableViewCell.self))
-        
-        guard let model = viewModel.modelTypeFor(indexPath) else { return cell! }
-        
-        var text = ""
+        guard let model = viewModel.modelTypeFor(indexPath) else { return UITableViewCell() }
         switch model {
         case .weekModel(let weekModel):
-            text = weekModel.description
+            let cell = getCell(type: model) as? WeekTableViewCell
+            cell?.update(weekModel)
+            return cell!
         case .eventModel(let event):
-            text = event.id
+            let cell = getCell(type: model) as? EventTableViewCell
+            cell?.update(event)
+            return cell!
         }
-        cell?.textLabel?.text = text
-        return cell!
+    }
+    
+    private func getCell(type: ViewModel.ModelType) -> UITableViewCell? {
+        switch type {
+        case .weekModel:
+            return tableView.dequeueReusableCell(withIdentifier: String(describing: WeekTableViewCell.self))
+        case .eventModel:
+            return tableView.dequeueReusableCell(withIdentifier: String(describing: EventTableViewCell.self))
+        }
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {

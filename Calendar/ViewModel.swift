@@ -45,7 +45,7 @@ class ViewModel {
         self.service  = CalendarService(yearRange: yearRange)
         
         // For test
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { // change 2 to desired number of seconds
             DispatchQueue.main.async {
                 self.updateWeekModels()
             }
@@ -77,12 +77,20 @@ class ViewModel {
         }
     }
     
+    func monthAndYearAtSection(_ section: Int) -> (year: Int, month: Int) {
+        let month = eventWeekModels[section].first?.calendarWeekModel.month ?? -1
+        let year = eventWeekModels[section].first?.calendarWeekModel.year ?? -1
+        return (year, month)
+    }
+    
     func updateWeekModels() {
-        let newDate = Calendar.gregorian.date(byAdding: DateComponents.init(month: 1, weekday: 17), to: Date())!
-        let newEvent = KKEvent.init(id: "yoyoyoyo!", date: newDate)
+        let newEvent = KKEvent.init(id: "yoyoyoyo!", date: Date())
+        
         if let index = service.getGroupIndex(by: newEvent.date) {
             eventWeekModels[index].forEach { (eventModel) in
                 if eventModel.calendarWeekModel.isContains(newEvent.date) {
+                    eventModel.events.append(newEvent)
+                    eventModel.events.append(newEvent)
                     eventModel.events.append(newEvent)
                 }
             }
