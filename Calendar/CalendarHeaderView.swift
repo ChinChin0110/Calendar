@@ -23,12 +23,16 @@ class CalendarHeaderView: UITableViewHeaderFooterView {
     }()
     
     override init(reuseIdentifier: String?) {
+        self.imageHeight = self.viewheight * 1.5
         super.init(reuseIdentifier: reuseIdentifier)
         
         contentView.clipsToBounds = true
         contentView.addSubview(imageView)
         contentView.addSubview(label)
     }
+    
+    let viewheight = CalendarConfig.headerHeight
+    let imageHeight: CGFloat
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -41,10 +45,16 @@ class CalendarHeaderView: UITableViewHeaderFooterView {
         let size = CGSize(width: frame.width * 4 / 5, height: frame.height / 3)
         
         label.frame = CGRect(origin: origin, size: size)
-        imageView.frame = CGRect(origin: .zero, size: frame.size)
+        imageView.frame = CGRect(origin: .zero, size: CGSize(width: frame.width, height: imageHeight))
     }
     
     func updateString(_ string: String) {
         label.text = string
+    }
+    
+    func setBackgroundPosition(_ percent: CGFloat) {
+        let space = imageHeight - viewheight
+        let origin = CGPoint(x: 0, y: space * percent - space)
+        self.imageView.frame = CGRect(origin: origin, size: imageView.frame.size)
     }
 }
